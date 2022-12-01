@@ -5,13 +5,13 @@ import fs from 'fs'
 export class example extends plugin {
   constructor() {
     super({
-      name: '抽卡期望',
-      dsc: '获取抽卡期望',
+      name: '原神抽卡期望',
+      dsc: '获取原神抽卡期望',
       event: 'message',
       priority: 5000,
       rule: [
         {
-          reg: '^#抽卡期望$',
+          reg: '^#原神抽卡期望$',
           fnc: 'getGachaExpect'
         }
       ]
