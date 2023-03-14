@@ -2,7 +2,7 @@ import plugin from '../../lib/plugins/plugin.js'
 import common from '../../lib/common/common.js'
 import fetch from 'node-fetch'
 import schedule from 'node-schedule'
-import { Group, segment } from 'oicq'
+import { segment } from 'oicq'
 
 // 定时发送时间，采用 Cron 表达式，当前默认为每日 9:30 分推送
 const time = '0 30 9 * * ?'
@@ -40,7 +40,7 @@ export class example extends plugin {
  * 推送新闻
  * @param e oicq传递的事件参数e
  */
-async function pushNews(e) {
+async function pushNews(e, isAuto = 0) {
   // e.msg 用户的命令消息
   if (e.msg) {
     logger.info('[用户命令]', e.msg)
@@ -57,7 +57,7 @@ async function pushNews(e) {
   }
 
   // 回复消息
-  if (e instanceof Group) {
+  if (isAuto) {
     e.sendMsg(segment.image(res))
   } else {
     e.reply(segment.image(res))
@@ -73,7 +73,7 @@ function autoTask() {
       logger.info('[每日新闻]：开始自动推送...')
       for (let i = 0; i < groupList.length; i++) {
         let group = Bot.pickGroup(groupList[i])
-        pushNews(group)
+        pushNews(group, 1)
         common.sleep(1000)
       }
     })
