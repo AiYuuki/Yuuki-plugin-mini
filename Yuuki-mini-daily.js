@@ -46,21 +46,36 @@ async function pushNews(e, isAuto = 0) {
     logger.info('[用户命令]', e.msg)
   }
 
-  // 摸鱼人日历接口地址
-  let url = await fetch('https://api.vvhan.com/api/60s?type=json').catch(err => logger.error(err))
-  let imgUrl = await url.json()
-  const res = await imgUrl.imgUrl
+  let url, imgUrl, res, time
 
-  // 判断接口是否请求成功
-  if (!res) {
-    logger.error('[每日新闻] 接口请求失败')
+  // 摸鱼人日历接口地址
+  try {
+    url = await fetch('https://api.03c3.cn/api/zb?type=jsonImg').catch(err => logger.error(err))
+    imgUrl = await url.json()
+    res = await imgUrl.data.imageurl
+    time = await imgUrl.data.datetime
+
+    // 判断接口是否请求成功
+    if (!res) {
+      logger.error('[每日新闻] 接口请求失败')
+      return
+    }
+  } catch (ex) {
+    if (!isAuto) {
+      e.reply(`获取早报失败：${ex}`)
+    }
+    return
   }
 
   // 回复消息
   if (isAuto) {
     e.sendMsg(segment.image(res))
   } else {
-    e.reply(segment.image(res))
+    if (isToday(time)) {
+      e.reply(segment.image(res))
+    } else {
+      e.reply(`今天（${time}）的早报尚未更新。`)
+    }
   }
 }
 
@@ -78,4 +93,18 @@ function autoTask() {
       }
     })
   }
+}
+
+/**
+ * 判断日期是否为今天
+ * @param dateString 接口返回的日期
+ */
+const isToday = dateString => {
+  const today = new Date()
+  const date = new Date(dateString)
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  )
 }
